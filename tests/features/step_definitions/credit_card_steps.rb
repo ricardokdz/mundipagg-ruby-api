@@ -1,6 +1,6 @@
 
-#Scenario 1: 
-Before do 
+#Scenario 1:
+Before do
 
 	@client = Mundipagg::Gateway.new :test
 	@client.log_level = :debug
@@ -9,6 +9,8 @@ Before do
 	@transaction = Mundipagg::CreditCardTransaction.new
 	@order.creditCardTransactionCollection << @transaction
 	@response = Hash.new
+    @shoppingCart = Mundipagg::ShoppingCart.new
+    @shoppingCartItem = Mundipagg::ShoppingCartItem.new
 
 end
 
@@ -18,6 +20,24 @@ Given(/^I have purchase three products with a total cost of (\w+) (\d+)$/) do |c
 	@order.amountInCents = (amount * 100).to_i
 	@order.amountInCentsToConsiderPaid = (amount * 100).to_i
 	@order.currencyIsoEnum = 'BRL'
+end
+
+Given(/^I have purchase three products with Shopping Cart a total cost of (\w+) (\d+)$/) do |currency,amount|
+    amount = BigDecimal.new(amount.gsub(',', '.'))
+    @order.amountInCents = (amount * 100).to_i
+    @order.amountInCentsToConsiderPaid = (amount * 100).to_i
+    @order.currencyIsoEnum = 'BRL'
+
+    @shoppingCartItem.itemReference = 'Test'
+    @shoppingCartItem.description = 'Test'
+    @shoppingCartItem.name = 'Test'
+    @shoppingCartItem.quantity = 3
+    @shoppingCartItem.totalCostInCents = 30
+    @shoppingCartItem.unitCostInCents = 10
+
+
+    @shoppingCart.freightCostInCents = 30
+    @shoppingCart.shoppingCartItemCollection << { @shoppingCartItem }
 end
 
 Given(/^I will pay using a (\w+) credit card in (\d+) installments$/) do |brand,installments|
@@ -46,12 +66,12 @@ Given(/^I will send to Mundipagg$/) do
 end
 
 Then(/^the order amount in cents should be (\d+)$/) do |amountInCents|
-  
+
 	transaction = @response[:create_order_response][:create_order_result][:credit_card_transaction_result_collection][:credit_card_transaction_result]
 	transaction[:amount_in_cents].to_s.should == amountInCents
 end
 
-Then(/^the transaction status should be (\w+)$/) do |status| 
+Then(/^the transaction status should be (\w+)$/) do |status|
 	transaction = @response[:create_order_response][:create_order_result][:credit_card_transaction_result_collection][:credit_card_transaction_result]
 	transaction[:credit_card_transaction_status_enum].to_s.downcase.should == status.downcase
 end
@@ -119,3 +139,7 @@ When(/^I pay another order with the instant buy key$/) do
     $stdout = old_stdout
   end
 end
+
+#Scenario 5:
+
+

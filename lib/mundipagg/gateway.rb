@@ -2,26 +2,26 @@ module Mundipagg
 	# Class that handles all webservice calls
 	class Gateway
 
-		# Sets the soap request log level.   
+		# Sets the soap request log level.
 		# Can be: { :debug, :info, :warn, :error or :none }
 		# Use :debug only to inspect the Xml sent and received to the service.
-		# Default in test environment => :debug 
-		# Default in production environment => :none 
+		# Default in test environment => :debug
+		# Default in production environment => :none
 		attr_accessor :log_level
 
-		# @return [Nori] Nori class who handle the conversion of base XML to a hash collection 
+		# @return [Nori] Nori class who handle the conversion of base XML to a hash collection
 		# @see https://github.com/savonrb/nori
 		attr_reader :parser
 
 		# <i>:test</i> = Simulator enviroment, fake transaction approval;
-		# <i>:production</i> = Real transaction, needs real credit card.  
-		# @return [Symbol] Webservice environment. 
-		attr_accessor :environment 
+		# <i>:production</i> = Real transaction, needs real credit card.
+		# @return [Symbol] Webservice environment.
+		attr_accessor :environment
 
-		# @return [String] URL that points to the simulator WSDL 
+		# @return [String] URL that points to the simulator WSDL
 		@@WEBSERVICE_TEST_URL = 'https://transaction.mundipaggone.com/MundiPaggService.svc?wsdl'
 
-		# @return [String] URL that points to the production WSDL 
+		# @return [String] URL that points to the production WSDL
 		@@WEBSERVICE_PRODUCTION_URL = 'https://transaction.mundipaggone.com/MundiPaggService.svc?wsdl'
 
 		# Initialize a class with an environment
@@ -30,18 +30,18 @@ module Mundipagg
 		def initialize(environment=:test)
 			@parser = Nori.new(:convert_tags_to => lambda { |tag| tag })
 			@environment = environment
-						
+
 			if environment == :test
 				@log_level = :debug
 			else
-				@log_level = :error 
+				@log_level = :error
 			end
 
 
 		end
 
 		# This method makes requests to the webservice method ManageOrder.
-		# 
+		#
 		# @param request [CreateOrderRequest] A ManagerOrderRequest instance containing information to capture or void a transaction or order.
 		# @return [Hash<Symbol, Object>] A hash collection containing the response data
 		def ManageOrder(request)
@@ -61,15 +61,15 @@ module Mundipagg
 		xml_hash['mun:ManageCreditCardTransactionCollection'] = {'mun:ManageCreditCardTransactionRequest'=>Array.new}
 
 		if request.transactionCollection.nil? == false and request.transactionCollection.count > 0
-			
+
 			request.transactionCollection.each do |transaction|
-				
+
 				xml_hash['mun:ManageCreditCardTransactionCollection']['mun:ManageCreditCardTransactionRequest'] << {
-					'mun:AmountInCents' => transaction.amountInCents, 
-					'mun:TransactionKey' => transaction.transactionKey, 
-					'mun:TransactionReference' => transaction.transactionReference 
+					'mun:AmountInCents' => transaction.amountInCents,
+					'mun:TransactionKey' => transaction.transactionKey,
+					'mun:TransactionReference' => transaction.transactionReference
 				}
-			end 
+			end
 		end
 
 		xml_hash['mun:ManageOrderOperationEnum'] = request.manageOrderOperationEnum
@@ -118,15 +118,17 @@ module Mundipagg
 			hash = @parser.parse('
 							 <tns:createOrderRequest>
 									<mun:AmountInCents>?</mun:AmountInCents>
-									<mun:AmountInCentsToConsiderPaid>?</mun:AmountInCentsToConsiderPaid>		            
-									<mun:CurrencyIsoEnum>?</mun:CurrencyIsoEnum>		            
-									<mun:MerchantKey>?</mun:MerchantKey>		            
+									<mun:AmountInCentsToConsiderPaid>?</mun:AmountInCentsToConsiderPaid>
+									<mun:CurrencyIsoEnum>?</mun:CurrencyIsoEnum>
+									<mun:MerchantKey>?</mun:MerchantKey>
 									<mun:OrderReference>?</mun:OrderReference>
 									<mun:RequestKey>?</mun:RequestKey>
 									<mun:Buyer>
 									</mun:Buyer>
+									<mun:ShoppingCartCollection>
+									</mun:ShoppingCartCollection>
 									<mun:CreditCardTransactionCollection>
-									</mun:CreditCardTransactionCollection>		            
+									</mun:CreditCardTransactionCollection>
 									<mun:BoletoTransactionCollection>
 									</mun:BoletoTransactionCollection>
 							 </tns:createOrderRequest>')
@@ -136,9 +138,9 @@ module Mundipagg
 			xml_hash['mun:AmountInCents'] = request.amountInCents
 
 			if request.amountInCentsToConsiderPaid == nil
-				xml_hash['mun:AmountInCentsToConsiderPaid'] = request.amountInCents 
+				xml_hash['mun:AmountInCentsToConsiderPaid'] = request.amountInCents
 			else
-				xml_hash['mun:AmountInCentsToConsiderPaid'] = request.amountInCentsToConsiderPaid 
+				xml_hash['mun:AmountInCentsToConsiderPaid'] = request.amountInCentsToConsiderPaid
 			end
 
 			xml_hash['mun:CurrencyIsoEnum'] = request.currencyIsoEnum
@@ -148,6 +150,10 @@ module Mundipagg
 
 			if request.buyer.nil? == false
 				xml_hash['mun:Buyer'] = CreateBuyer(request)
+			end
+
+			if request.shoppingCartCollection.nil? == false
+				xml_hash['mun:ShoppingCartCollection'] = CreateShoppingCart(request.shoppingCartCollection)
 			end
 
 			if not request.creditCardTransactionCollection.nil? and request.creditCardTransactionCollection.count > 0
@@ -172,9 +178,9 @@ module Mundipagg
 		end
 
 
-		# This method create a hash collection with all buyer information. 
+		# This method create a hash collection with all buyer information.
 		# The hash collection is a part of the data send to the webservice.
-		# 
+		#
 		# @param request [CreateOrderRequest]
 		# @return [Hash<Symbol, Object>] Hash collection with buyer information.
 		# @!visibility private
@@ -224,9 +230,37 @@ module Mundipagg
 			return buyer
 		end
 
-		# This method create a hash collection with all boleto transactions information. 
+		def CreateShoppingCart(request)
+
+			shoppingCartColl = {'mun:ShoppingCart' => Array.new}
+
+			request.shoppingCartCollection.each do |shoppingCart|
+
+				shoppingCartColl['mun:ShoppingCart'] << {
+					'mun:FreightCostInCents' => shoppingCart.freightCostInCents,
+					'mun:ShoppingCartItemCollection' => Array.new
+				}
+
+				shoppingCart.shoppingCartItemCollection do |shoppingCartItem|
+					shoppingCartColl['mun:ShoppingCartItemCollection']['mun:ShoppingCartItem'] << {
+						'mun:Description' => shoppingCartItem.description,
+						'mun:ItemReference' => shoppingCartItem.itemReference,
+						'mun:Name' => shoppingCartItem.name,
+						'mun:Quantity' => shoppingCartItem.quantity,
+						'mun:TotalCostInCents' => shoppingCartItem.totalCostInCents,
+						'mun:UnitCostInCents' => shoppingCartItem.unitCostInCents
+					}
+				end
+
+			end
+
+			return shoppingCartColl
+
+		end
+
+		# This method create a hash collection with all boleto transactions information.
 		# The hash collection is a part of the data send to the webservice.
-		# 
+		#
 		# @param boletoRequest [Array<BoletoTransaction>] CreateOrderRequest instance
 		# @return [Hash<Symbol, Object>] Hash collection with one or more boleto transactions.
 		# @!visibility private
@@ -251,9 +285,9 @@ module Mundipagg
 			return transactionCollection
 		end
 
-		# This method create a hash collection with all credit card transactions information. 
+		# This method create a hash collection with all credit card transactions information.
 		# The hash collection is a part of the data send to the webservice.
-		# 
+		#
 		# @param creditCardRequest [Array<CreditCardTransaction>] CreateOrderRequest instance
 		# @return [Hash<Symbol, Object>] Hash collection with one or more credit card transactions.
 		# @!visibility private
@@ -292,9 +326,9 @@ module Mundipagg
                                       'mun:TransactionReference' => transaction.transactionReference
                                    }
                                  end
-                    
+
                                 if transaction.recurrency.nil? == false
-					
+
 					transaction_hash['mun:Recurrency'] = {
 						'mun:DateToStartBilling' => transaction.recurrency.dateToStartBilling,
 						'mun:FrequencyEnum' => transaction.recurrency.frequencyEnum,
@@ -312,7 +346,7 @@ module Mundipagg
 
 
 		# This method send the hash collectin created in this client and send it to the webservice.
-		# 
+		#
 		# == Parameters:
 		# @param hash [Hash<Symbol, Object] Hash collection generated by Nori using the base SOAP XML.
 		# @param service_method [Symbol] A Symbol declaring the method that will be called. Can be <i>:create_order</i>, <i>:manage_order<i/> or <i>:query_order</i>.
