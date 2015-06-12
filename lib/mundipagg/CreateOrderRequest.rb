@@ -47,7 +47,7 @@ module Mundipagg
 
 		# Initialize class and properties
 	    def initialize
-	    	@shoppingCartCollection = Array.new
+		    	@shoppingCartCollection = Array.new;
 			@creditCardTransactionCollection = Array.new;
 			@boletoTransactionCollection = Array.new;
 			@currencyIsoEnum = CreateOrderRequest.CurrencyIsoEnum[:BrazillianReal]

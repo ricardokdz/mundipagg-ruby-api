@@ -66,3 +66,6 @@ DEPENDENCIES
   rake
   rspec
   savon (~> 2.3)
+
+BUNDLED WITH
+   1.10.2

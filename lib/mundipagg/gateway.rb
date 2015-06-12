@@ -152,8 +152,8 @@ module Mundipagg
 				xml_hash['mun:Buyer'] = CreateBuyer(request)
 			end
 
-			if request.shoppingCartCollection.nil? == false
-				xml_hash['mun:ShoppingCartCollection'] = CreateShoppingCart(request.shoppingCartCollection)
+			if not request.shoppingCartCollection.nil? and request.shoppingCartCollection.count > 0
+				xml_hash['mun:ShoppingCartCollection'] = CreateShoppingCart(request)
 			end
 
 			if not request.creditCardTransactionCollection.nil? and request.creditCardTransactionCollection.count > 0
@@ -169,6 +169,12 @@ module Mundipagg
 				boletoTransactionCollection = CreateBoletoTransactionRequest(request);
 				xml_hash['mun:BoletoTransactionCollection'] = boletoTransactionCollection
 			end
+
+			if not request.shoppingCartCollection.nil? and request.shoppingCartCollection.count > 0
+				File.write('/home/andre/Documentos/logfile.txt', hash)
+			end
+
+
 
 			response = SendToService(hash, :create_order)
 
@@ -192,7 +198,6 @@ module Mundipagg
 				'mun:Email' => request.buyer.email,
 				'mun:GenderEnum' => request.buyer.genderEnum,
 				'mun:FacebookId' => request.buyer.facebookId,
-				'mun:GenderEnum' => request.buyer.genderEnum,
 				'mun:HomePhone' => request.buyer.homePhone,
 				'mun:IpAddress' => request.buyer.ipAddress,
 				'mun:MobilePhone' => request.buyer.mobilePhone,
@@ -241,8 +246,8 @@ module Mundipagg
 					'mun:ShoppingCartItemCollection' => Array.new
 				}
 
-				shoppingCart.shoppingCartItemCollection do |shoppingCartItem|
-					shoppingCartColl['mun:ShoppingCartItemCollection']['mun:ShoppingCartItem'] << {
+				shoppingCart.shoppingCartItemCollection.each do |shoppingCartItem|
+					shoppingCartColl['mun:ShoppingCart']['mun:ShoppingCartItemCollection']['mun:ShoppingCartItem'] << {
 						'mun:Description' => shoppingCartItem.description,
 						'mun:ItemReference' => shoppingCartItem.itemReference,
 						'mun:Name' => shoppingCartItem.name,

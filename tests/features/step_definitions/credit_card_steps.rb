@@ -11,6 +11,7 @@ Before do
 	@response = Hash.new
     @shoppingCart = Mundipagg::ShoppingCart.new
     @shoppingCartItem = Mundipagg::ShoppingCartItem.new
+    @order.shoppingCartCollection << @shoppingCart
 
 end
 
@@ -32,12 +33,14 @@ Given(/^I have purchase three products with Shopping Cart a total cost of (\w+) 
     @shoppingCartItem.description = 'Test'
     @shoppingCartItem.name = 'Test'
     @shoppingCartItem.quantity = 3
-    @shoppingCartItem.totalCostInCents = 30
-    @shoppingCartItem.unitCostInCents = 10
+    @shoppingCartItem.totalCostInCents = 3000
+    @shoppingCartItem.unitCostInCents = 1000
 
 
     @shoppingCart.freightCostInCents = 30
-    @shoppingCart.shoppingCartItemCollection << { @shoppingCartItem }
+    @shoppingCart.shoppingCartItemCollection << @shoppingCartItem
+
+    @order.shoppingCartCollection << @shoppingCart
 end
 
 Given(/^I will pay using a (\w+) credit card in (\d+) installments$/) do |brand,installments|
@@ -139,7 +142,4 @@ When(/^I pay another order with the instant buy key$/) do
     $stdout = old_stdout
   end
 end
-
-#Scenario 5:
-
 
