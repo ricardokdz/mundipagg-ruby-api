@@ -239,15 +239,12 @@ module Mundipagg
 
 			shoppingCartColl = {'mun:ShoppingCart' => Array.new}
 
+			shoppingCartItemCollection = {'mun:ShoppingCartItem' => Array.new}
+
 			request.shoppingCartCollection.each do |shoppingCart|
 
-				shoppingCartColl['mun:ShoppingCart'] << {
-					'mun:FreightCostInCents' => shoppingCart.freightCostInCents,
-					'mun:ShoppingCartItemCollection' => Array.new
-				}
-
 				shoppingCart.shoppingCartItemCollection.each do |shoppingCartItem|
-					shoppingCartColl['mun:ShoppingCart']['mun:ShoppingCartItemCollection']['mun:ShoppingCartItem'] << {
+					shoppingCartItemCollection['mun:ShoppingCartItem'] << {
 						'mun:Description' => shoppingCartItem.description,
 						'mun:ItemReference' => shoppingCartItem.itemReference,
 						'mun:Name' => shoppingCartItem.name,
@@ -256,6 +253,11 @@ module Mundipagg
 						'mun:UnitCostInCents' => shoppingCartItem.unitCostInCents
 					}
 				end
+
+				shoppingCartColl['mun:ShoppingCart'] << {
+					'mun:FreightCostInCents' => shoppingCart.freightCostInCents,
+					'mun:ShoppingCartItemCollection' => shoppingCartItemCollection
+				}
 
 			end
 
