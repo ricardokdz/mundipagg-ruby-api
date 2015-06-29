@@ -170,12 +170,6 @@ module Mundipagg
 				xml_hash['mun:BoletoTransactionCollection'] = boletoTransactionCollection
 			end
 
-			if not request.shoppingCartCollection.nil? and request.shoppingCartCollection.count > 0
-				File.write('/home/andre/Documentos/logfile.txt', hash)
-			end
-
-
-
 			response = SendToService(hash, :create_order)
 
 
