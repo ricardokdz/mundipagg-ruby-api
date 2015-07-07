@@ -1,5 +1,5 @@
 Feature: Credit Card Transaction
-	I want to create a order with one credit card transaction.
+    I want to create a order with one credit card transaction.
 
             Scenario: Pay a order using credit card and installment
                 Given I have purchase three products with a total cost of BRL 250
@@ -28,10 +28,16 @@ Feature: Credit Card Transaction
                 When I pay another order with the instant buy key
                 Then the transaction status should be Captured
 
+            Scenario: Pay a order using credit card and installment
+               Given I have purchase three products with Shopping Cart a total cost of BRL 300
+               And I will pay using a Visa credit card in 3 installments
+               And I will send to Mundipagg
+               Then the order amount in cents should be 30000
+               And the transaction status should be Captured
 
-  	Scenario: Pay a order using credit card and installment
-	   Given I have purchase three products with Shopping Cart a total cost of BRL 300
-	   And I will pay using a Visa credit card in 3 installments
-	   And I will send to Mundipagg
-	   Then the order amount in cents should be 30000
-	   And the transaction status should be Captured
+          	Scenario: Pay a order using credit card and installment
+        	   Given I have purchase three products with Buyer data and a total cost of BRL 300
+        	   And I will pay using a Visa credit card in 3 installments
+        	   And I will send to Mundipagg
+        	   Then the order amount in cents should be 30000
+        	   And the transaction status should be Captured

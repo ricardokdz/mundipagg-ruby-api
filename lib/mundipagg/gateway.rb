@@ -198,7 +198,7 @@ module Mundipagg
 				'mun:Name' => request.buyer.name,
 				'mun:PersonTypeEnum' => request.buyer.personTypeEnum,
 				'mun:TaxDocumentNumber' => request.buyer.taxDocumentNumber,
-				'mun:TaxDocumentNumberTypeEnum' => request.buyer.taxDocumentTypeEnum,
+				'mun:TaxDocumentTypeEnum' => request.buyer.taxDocumentTypeEnum,
 				'mun:TwitterId' => request.buyer.twitterId,
 				'mun:WorkPhone' => request.buyer.workPhone,
 				'mun:BuyerAddressCollection' => nil
@@ -385,6 +385,7 @@ module Mundipagg
 				log enable_log
 				log_level level
 				filters filters
+				ssl_verify_mode :none
 				namespaces 'xmlns:mun' => 'http://schemas.datacontract.org/2004/07/MundiPagg.One.Service.DataContracts'
 			end
 

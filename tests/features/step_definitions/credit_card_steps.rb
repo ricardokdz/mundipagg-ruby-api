@@ -8,6 +8,7 @@ Before do
 	@order.merchantKey = TestConfiguration::Merchant::MerchantKey
 	@transaction = Mundipagg::CreditCardTransaction.new
 	@order.creditCardTransactionCollection << @transaction
+  @buyer = Mundipagg::Buyer.new
 	@response = Hash.new
     @shoppingCart = Mundipagg::ShoppingCart.new
     @shoppingCartItem = Mundipagg::ShoppingCartItem.new
@@ -41,7 +42,28 @@ Given(/^I have purchase three products with Shopping Cart a total cost of (\w+) 
     @shoppingCart.shoppingCartItemCollection << @shoppingCartItem
 
     @order.shoppingCartCollection << @shoppingCart
+
 end
+
+
+Given(/^I have purchase three products with Buyer data and a total cost of (\w+) (\d+)$/) do |currency,amount|
+    amount = BigDecimal.new(amount.gsub(',', '.'))
+    @order.amountInCents = (amount * 100).to_i
+    @order.amountInCentsToConsiderPaid = (amount * 100).to_i
+    @order.currencyIsoEnum = 'BRL'
+
+    @buyer.buyerReference = 'Test'
+    @buyer.email = 'a@a.com'
+    @buyer.homePhone = '999999999'
+    @buyer.mobilePhone = '999999999'
+    @buyer.workPhone = '999999999'
+    @buyer.name = 'Test'
+    @buyer.taxDocumentNumber = '02156968975'
+
+
+    @order.buyer = @buyer
+end
+
 
 Given(/^I will pay using a (\w+) credit card in (\d+) installments$/) do |brand,installments|
 	@transaction.creditCardBrandEnum = brand
