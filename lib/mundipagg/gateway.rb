@@ -19,7 +19,7 @@ module Mundipagg
 		attr_accessor :environment
 
 		# @return [String] URL that points to the simulator WSDL
-		@@WEBSERVICE_TEST_URL = 'https://transaction.mundipaggone.com/MundiPaggService.svc?wsdl'
+		@@WEBSERVICE_TEST_URL = 'https://staging.mundipaggone.com/MundiPaggService.svc?wsdl'
 
 		# @return [String] URL that points to the production WSDL
 		@@WEBSERVICE_PRODUCTION_URL = 'https://transaction.mundipaggone.com/MundiPaggService.svc?wsdl'
